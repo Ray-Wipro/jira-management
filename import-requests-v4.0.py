@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 Script Python per interrogare l'API Jira e generare un report delle issue assegnate all'utente corrente.
 
@@ -23,6 +24,8 @@ Utilizzo:
 Autore: Roberto Raimondi
 """
 
+=======
+>>>>>>> 835b17702e39bc3b365e1c348da83227033c6831
 import requests
 import sys
 import os
