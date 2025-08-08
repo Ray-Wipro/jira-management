@@ -30,9 +30,10 @@ from dotenv import load_dotenv
 
 # === CONFIG ===
 VERSIONE    = "2.0"
-JIRA_URL    = "https://ejlog.atlassian.net"        # <-- Modifica con il tuo dominio
-USERNAME    = "rraimondi@ferrettogroup.com"        # <-- Tuo utente Atlassian
-API_TOKEN   = os.getenv("JIRA_API_TOKEN")          # <-- Imposta la variabile d'ambiente JIRA_API_TOKEN con il tuo token API
+JIRA_URL    = "https://ejlog.atlassian.net"     # <-- Modifica con il tuo dominio
+USERNAME    = "rraimondi@ferrettogroup.com"     # <-- Tuo utente Atlassian
+load_dotenv()                                   # Carica le variabili d'ambiente da .env se presente
+API_TOKEN   = os.getenv("JIRA_API_TOKEN")       # <-- Imposta la variabile d'ambiente JIRA_API_TOKEN con il tuo token API
 
 # === ID dei campi custom ===
 CAMPO_RIFERIMENTI = "customfield_10146"
