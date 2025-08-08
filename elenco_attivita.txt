@@ -9,8 +9,6 @@ BOS-38 Bossong - verifica peso ingresso magazzino (In Corso)
 # MEDIUM PRIORITY
 ##############################
 
-PRM-2 Parmalat - differente rappresentazione allarmi sui due clients (In Corso, scad. 03-02-2023)
-SAI-1 Salvagnini Industriale - virtualizzazione PC (Stand by Cliente, scad. 27-01-2025)
 SAL-62 Salvagnini - MV_0186 Provia  (Stand by Cliente, scad. 23-06-2025)
 SAL-63 Salvagnini - MV_0191 CMA (Da Gestire, scad. 21-07-2025)
 SAL-65 Salvagnini - MV_0071 Galletti (In Corso, scad. 07-08-2025)
@@ -20,11 +18,7 @@ MND-4 Mondelez - test funzionamento MOXA (Stand by Interno, scad. 22-08-2025)
 UNF-4 Unifarco (Unione Farmacisti) - Unifarco - test scambio dati ERP con servizio REST (In Corso, scad. 05-09-2025)
 FIT-3 FITT - [22SO-002415] [#3897] FITT - presenza di UdC non associate a gettone da cancellare (In Corso)
 ARC-6 Arconvert - aggiornamento S.O. dei Server (Stand by Interno)
-COM-12 COMAS - richiesta di aggiornamento Log4j v2.x (Stand by Cliente)
 FOR-4 FOR - anomalia gestione stampanti (In Corso)
-COM-13 COMAS - RO - vulnerabilità Log4j v1.x (Stand by Interno)
-ERB-5 Erba SpA - Erba - tuning sistema WMS (In Corso)
-SAL-32 Salvagnini - richiesta aumento spazio HD (Stand by Cliente)
 FOR-5 FOR - modifche WMS (In Corso)
 FOR-6 FOR - cambio tipo imballo da lista (Stand by Interno)
 FOR-7 FOR - esportazione dati da FG ricerca UdS (Stand by Interno)
@@ -52,11 +46,17 @@ CPC-15 CPC - 2 - implementazione funzionamento della baia operatore (Da Gestire)
 MM-1 MM Cittadella degli archivi - MM - preparare manuale operatore (In Corso)
 MND-3 Mondelez - preparazione manuale operatore in inglese (Da Gestire)
 UNF-5 Unifarco (Unione Farmacisti) - Unifarco - preparazione manuale operatore (Da Gestire)
+WIKI-60 EJLog_WIKI - Salvare script python da Visual Studio Code su Github  (In Corso)
 
 ##############################
 # LOW PRIORITY
 ##############################
 
+SAI-1 Salvagnini Industriale - virtualizzazione PC (Stand by Cliente, scad. 27-01-2025)
+COM-12 COMAS - richiesta di aggiornamento Log4j v2.x (Stand by Cliente)
 CEI-3 CEIA - modifica WMS  (Da Gestire)
+COM-13 COMAS - RO - vulnerabilità Log4j v1.x (Stand by Interno)
+ERB-5 Erba SpA - Erba - tuning sistema WMS (Stand by Interno)
+SAL-32 Salvagnini - richiesta aumento spazio HD (Stand by Cliente)
 PEL-9 P.E. Labellers - PE Labellers - ritardo nella stampa delle etichette (Stand by Interno)
 BOS-44 Bossong - anomalia modifica dati casse (In Corso)

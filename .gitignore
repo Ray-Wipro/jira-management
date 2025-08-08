@@ -1,0 +1,17 @@
+# Ignora file con credenziali e variabili d'ambiente
+.env
+
+# Ignora eventuali file temporanei di Word
+~$*.docx
+
+# Ignora cache Python
+__pycache__/
+*.pyc
+
+# Ignora file di Word e di testo
+*.doc
+*.docx
+*.txt
+
+# Ignora cartella backup
+backup/

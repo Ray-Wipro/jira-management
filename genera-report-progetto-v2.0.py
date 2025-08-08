@@ -22,15 +22,17 @@ Requisiti:
 
 import requests
 import sys
+import os
 from docx import Document
 from docx.shared import Pt
 from datetime import datetime
+from dotenv import load_dotenv
 
 # === CONFIG ===
-VERSIONE = "2.0"
-JIRA_URL = "https://ejlog.atlassian.net"        # <-- Modifica con il tuo dominio
-USERNAME = "rraimondi@ferrettogroup.com"        # <-- Tuo utente Atlassian
-API_TOKEN = "ATATT3xFfGF0rFdHpQs25sHiT1VUn4-jmZl3nsdGWBB_hHAUMa1rePZsj758F_s7d0lWi7C0tCD4a-e8EOTQTvFZO_jtl3WYU0gG5tNv8bg2RkUDV24oYBapEB7-MQF7opXFmFREB1UCMDqRN_-ZZAkQL8xFceDjOowuNTx53CSyB1-HO1WJhUc=9EAB0E42"                  # <-- Generato da https://id.atlassian.com/manage/api-tokens
+VERSIONE    = "2.0"
+JIRA_URL    = "https://ejlog.atlassian.net"        # <-- Modifica con il tuo dominio
+USERNAME    = "rraimondi@ferrettogroup.com"        # <-- Tuo utente Atlassian
+API_TOKEN   = os.getenv("JIRA_API_TOKEN")          # <-- Imposta la variabile d'ambiente JIRA_API_TOKEN con il tuo token API
 
 # === ID dei campi custom ===
 CAMPO_RIFERIMENTI = "customfield_10146"

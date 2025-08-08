@@ -1,13 +1,17 @@
 import requests
+import sys
+import os
 from datetime import datetime
 from docx import Document
+from dotenv import load_dotenv
 
 doc = Document()
 
 # === CONFIGURAZIONE ===
 JIRA_URL = "https://ejlog.atlassian.net"
 USERNAME = "rraimondi@ferrettogroup.com"
-API_TOKEN = "ATATT3xFfGF0rFdHpQs25sHiT1VUn4-jmZl3nsdGWBB_hHAUMa1rePZsj758F_s7d0lWi7C0tCD4a-e8EOTQTvFZO_jtl3WYU0gG5tNv8bg2RkUDV24oYBapEB7-MQF7opXFmFREB1UCMDqRN_-ZZAkQL8xFceDjOowuNTx53CSyB1-HO1WJhUc=9EAB0E42"                  # <-- Generato da https://id.atlassian.com/manage/api-tokens
+load_dotenv()                                   # Carica le variabili d'ambiente da .env se presente
+API_TOKEN   = os.getenv("JIRA_API_TOKEN")       # <-- Imposta la variabile d'ambiente JIRA_API_TOKEN con il tuo token API
 
 JQL = 'assignee = currentUser() AND status in ("Da Gestire", "In corso", "Stand by Cliente", "Stand by Interno") ORDER BY priority DESC, project, duedate ASC, created ASC'
 
