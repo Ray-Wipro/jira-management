@@ -1,0 +1,49 @@
+Key,Summary,Status,Priority,Created,Due Date,Project
+ARC-11,Arconvert - definire procedura di switch dei server ,Stand by Interno,High,2023-11-16T13:25:17.817+0000,2025-08-13,ARC
+BOS-38,Bossong - verifica peso ingresso magazzino,In Corso,High,2024-07-05T14:06:43.559+0000,,BOS
+AM-12,Amcor - richiesta per ottimizzare connessione assistenza,Stand by Interno,Medium,2025-07-07T09:04:18.192+0000,,AM
+ARC-15,Arconvert - migrazione Client ,In Corso,Medium,2025-06-23T14:32:45.448+0000,2025-08-13,ARC
+ARC-6,Arconvert - aggiornamento S.O. dei Server,Stand by Interno,Medium,2023-03-21T13:18:14.742+0000,,ARC
+BOS-43,Bossong - anomalia ricerca cassa,In Corso,Medium,2025-03-19T08:50:16.960+0000,,BOS
+COM-15,Comas KR - verifica funzionalità,In Corso,Medium,2025-01-31T09:18:22.843+0000,,COM
+CPC-8,CPC - tuning del sistema,Stand by Interno,Medium,2025-01-21T09:22:34.624+0000,2025-08-13,CPC
+CPC-9,CPC - tempo di ritardo per baia 100,Stand by Interno,Medium,2025-04-03T09:32:41.661+0000,,CPC
+CPC-12,CPC 2 - preparazione ambiente WMS ,In Corso,Medium,2025-06-27T15:05:04.750+0000,,CPC
+CPC-13,CPC - attivazione connessione VPN,In Corso,Medium,2025-07-18T08:37:05.793+0000,,CPC
+CPC-15,CPC 2 - implementazione funzionamento della baia operatore,Da Gestire,Medium,2025-08-07T09:03:28.592+0000,,CPC
+DMR-14,Di Mauro - aggiornamento servers,Stand by Cliente,Medium,2024-03-14T09:17:18.745+0000,,DMR
+DMR-18,Di Mauro - Bobine - dimensioni database,Da Gestire,Medium,2024-10-08T15:32:50.207+0000,,DMR
+FIS-11,FIS Montecchio MPF - rimozione avviso Backup non trovato,Da Gestire,Medium,2024-10-25T12:05:20.564+0000,,FIS
+FIT-3,[22SO-002415] [#3897] FITT - presenza di UdC non associate a gettone da cancellare,In Corso,Medium,2022-12-15T16:16:57.724+0000,,FIT
+FOR-4,FOR - anomalia gestione stampanti,In Corso,Medium,2024-01-15T11:33:03.230+0000,,FOR
+FOR-5,FOR - modifche WMS,In Corso,Medium,2024-02-16T07:19:06.555+0000,,FOR
+FOR-6,FOR - cambio tipo imballo da lista,Stand by Interno,Medium,2024-02-17T09:33:25.089+0000,,FOR
+FOR-7,FOR - esportazione dati da FG ricerca UdS,Stand by Interno,Medium,2024-02-17T09:43:14.187+0000,,FOR
+FLT-2,Filtrec - installazione ambiente WMS,In Corso,Medium,2025-07-08T07:51:24.396+0000,,FLT
+FCR-10,Fonderia Corrà - Richiesta supporto per installazione client,Da Gestire,Medium,2024-10-17T07:02:03.455+0000,,FCR
+GRN-7,Greenpack - uscita UdC ,In Corso,Medium,2024-07-17T10:50:23.353+0000,,GRN
+KOB-3,Kobe - cannot be change location for some LUs  ,Stand by Interno,Medium,2024-08-12T07:52:36.265+0000,,KOB
+KOB-4,Kobe - messaggio errore comunicazione driver,In Corso,Medium,2024-09-11T07:05:51.462+0000,,KOB
+KML-1,Kamlit - Documentazione,In Corso,Medium,2025-05-19T12:18:26.995+0000,,KML
+KML-2,Kamlit - Codifica delle stringhe in lingua,In Corso,Medium,2025-08-05T13:11:15.845+0000,,KML
+MM-1,MM - preparare manuale operatore,In Corso,Medium,2025-08-07T12:19:01.975+0000,,MM
+MND-4,Mondelez - test funzionamento MOXA,Stand by Interno,Medium,2025-08-07T12:32:11.614+0000,2025-08-22,MND
+MND-3,Mondelez - preparazione manuale operatore in inglese,Da Gestire,Medium,2025-08-07T08:42:02.625+0000,,MND
+MTX-14,Mondialtex n - errore scambio dati ERP,Da Gestire,Medium,2024-07-17T08:19:43.798+0000,,MTX
+PEL-12,PE Labellers - attivazione riordino automatico,Stand by Cliente,Medium,2024-12-30T16:16:56.296+0000,,PEL
+PPL-1,Promag PL - sostituzione due PC per Vertimag,In Corso,Medium,2024-12-04T16:42:36.673+0000,,PPL
+SSM-3,SI.STE.M. - comunicazione interrotta con ...,Stand by Cliente,Medium,2024-07-17T12:22:43.230+0000,,SSM
+SAL-62,Salvagnini - MV_0186 Provia ,Stand by Cliente,Medium,2025-06-17T15:08:41.831+0000,2025-06-23,SAL
+SAL-63,Salvagnini - MV_0191 CMA,Da Gestire,Medium,2025-06-17T15:10:30.775+0000,2025-07-21,SAL
+SAL-65,Salvagnini - MV_0071 Galletti,In Corso,Medium,2025-07-08T12:21:22.960+0000,2025-08-07,SAL
+UNF-4,Unifarco - test scambio dati ERP con servizio REST,In Corso,Medium,2025-08-07T08:13:01.580+0000,2025-09-05,UNF
+UNF-5,Unifarco - preparazione manuale operatore,Da Gestire,Medium,2025-08-07T08:26:27.618+0000,,UNF
+BOS-44,Bossong - anomalia modifica dati casse,In Corso,Low,2025-03-28T07:28:42.054+0000,,BOS
+CEI-3,CEIA - modifica WMS ,Da Gestire,Low,2024-01-19T07:58:00.533+0000,,CEI
+COM-12,Comas - richiesta di aggiornamento Log4j v2.x,Stand by Cliente,Low,2024-01-15T14:08:32.852+0000,,COM
+COM-13,Comas RO - vulnerabilità Log4j v1.x,Stand by Interno,Low,2024-01-19T11:15:15.215+0000,,COM
+ERB-5,Erba - tuning sistema WMS,Stand by Interno,Low,2024-01-19T08:16:57.277+0000,,ERB
+PEL-9,PE Labellers - ritardo nella stampa delle etichette,Stand by Interno,Low,2024-03-07T09:19:11.816+0000,,PEL
+SAL-32,Salvagnini - richiesta aumento spazio HD,Stand by Cliente,Low,2024-02-08T11:20:26.171+0000,,SAL
+SAI-1,Salvagnini Industriale - virtualizzazione PC,Stand by Cliente,Low,2024-10-25T13:51:10.860+0000,2025-01-27,SAI
+PRM-2,Parmalat - differente rappresentazione allarmi sui due clients,Stand by Interno,Lowest,2023-02-03T07:15:04.129+0000,2023-02-03,PRM
