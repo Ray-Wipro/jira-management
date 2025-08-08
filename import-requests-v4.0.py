@@ -1,3 +1,28 @@
+"""
+Script Python per interrogare l'API Jira e generare un report delle issue assegnate all'utente corrente.
+
+Funzionalità principali:
+- Carica il token API Jira da un file .env per motivi di sicurezza.
+- Esegue una query JQL per recuperare le issue assegnate all'utente con stati specifici (Da Gestire, In corso, Stand by Cliente, Stand by Interno).
+- Raggruppa le issue per priorità (High, Medium, Low, Nessuna).
+- Ordina le issue per data di scadenza e data di creazione.
+- Genera due file di output:
+  1. Un documento Word (.docx) con le issue formattate, in cui la chiave dell’issue è in grassetto.
+  2. Un file di testo (.txt) con l’elenco delle issue.
+- Gestisce eventuali errori di risposta dall’API.
+
+Prerequisiti:
+- Installare le librerie Python: requests, python-docx, python-dotenv
+- Creare un file `.env` contenente la variabile JIRA_API_TOKEN con il token API di Jira.
+
+Utilizzo:
+- Modificare le variabili JIRA_URL e USERNAME con i propri dati.
+- Eseguire lo script da riga di comando.
+- Trovare i file `elenco_attivita.docx` e `elenco_attivita.txt` nella cartella di esecuzione.
+
+Autore: Roberto Raimondi
+"""
+
 import requests
 import sys
 import os
