@@ -1,0 +1,62 @@
+##############################
+# HIGH PRIORITY
+##############################
+
+ARC-11 Arconvert - definire procedura di switch dei server  (Stand by Interno, scad. 13-08-2025)
+BOS-38 Bossong - verifica peso ingresso magazzino (In Corso)
+
+##############################
+# MEDIUM PRIORITY
+##############################
+
+PRM-2 Parmalat - differente rappresentazione allarmi sui due clients (In Corso, scad. 03-02-2023)
+SAI-1 Salvagnini Industriale - virtualizzazione PC (Stand by Cliente, scad. 27-01-2025)
+SAL-62 Salvagnini - MV_0186 Provia  (Stand by Cliente, scad. 23-06-2025)
+SAL-63 Salvagnini - MV_0191 CMA (Da Gestire, scad. 21-07-2025)
+SAL-65 Salvagnini - MV_0071 Galletti (In Corso, scad. 07-08-2025)
+CPC-8 CPC - tuning del sistema (Stand by Interno, scad. 13-08-2025)
+ARC-15 Arconvert - migrazione Client  (In Corso, scad. 13-08-2025)
+MND-4 Mondelez - test funzionamento MOXA (Stand by Interno, scad. 22-08-2025)
+UNF-4 Unifarco (Unione Farmacisti) - Unifarco - test scambio dati ERP con servizio REST (In Corso, scad. 05-09-2025)
+FIT-3 FITT - [22SO-002415] [#3897] FITT - presenza di UdC non associate a gettone da cancellare (In Corso)
+ARC-6 Arconvert - aggiornamento S.O. dei Server (Stand by Interno)
+COM-12 COMAS - richiesta di aggiornamento Log4j v2.x (Stand by Cliente)
+FOR-4 FOR - anomalia gestione stampanti (In Corso)
+COM-13 COMAS - RO - vulnerabilità Log4j v1.x (Stand by Interno)
+ERB-5 Erba SpA - Erba - tuning sistema WMS (In Corso)
+SAL-32 Salvagnini - richiesta aumento spazio HD (Stand by Cliente)
+FOR-5 FOR - modifche WMS (In Corso)
+FOR-6 FOR - cambio tipo imballo da lista (Stand by Interno)
+FOR-7 FOR - esportazione dati da FG ricerca UdS (Stand by Interno)
+DMR-14 Di Mauro - aggiornamento servers (Stand by Cliente)
+GRN-7 Greenpack - uscita UdC  (In Corso)
+MTX-14 Mondialtex - n - errore scambio dati ERP (Da Gestire)
+SSM-3 SI.STE.M. - comunicazione interrotta con ... (Stand by Cliente)
+KOB-3 KOBE - cannot be change location for some LUs   (Stand by Interno)
+KOB-4 KOBE - messaggio errore comunicazione driver (In Corso)
+DMR-18 Di Mauro - Bobine - dimensioni database (Da Gestire)
+FCR-10 Fonderia Corrà - Richiesta supporto per installazione client (Da Gestire)
+FIS-11 F.I.S. - FIS Montecchio MPF - rimozione avviso Backup non trovato (Da Gestire)
+PPL-1 Promag Polonia - Promag PL - sostituzione due PC per Vertimag (In Corso)
+PEL-12 P.E. Labellers - PE Labellers - attivazione riordino automatico (Stand by Cliente)
+COM-15 COMAS - KR - verifica funzionalità (In Corso)
+BOS-43 Bossong - anomalia ricerca cassa (In Corso)
+CPC-9 CPC - tempo di ritardo per baia 100 (Stand by Interno)
+KML-1 Kamlit - Documentazione (In Corso)
+CPC-12 CPC - 2 - preparazione ambiente WMS  (In Corso)
+AM-12 Amcor - richiesta per ottimizzare connessione assistenza (Stand by Interno)
+FLT-2 Filtrec - installazione ambiente WMS (In Corso)
+CPC-13 CPC - attivazione connessione VPN (In Corso)
+KML-2 Kamlit - Codifica delle stringhe in lingua (In Corso)
+CPC-15 CPC - 2 - implementazione funzionamento della baia operatore (Da Gestire)
+MM-1 MM Cittadella degli archivi - MM - preparare manuale operatore (In Corso)
+MND-3 Mondelez - preparazione manuale operatore in inglese (Da Gestire)
+UNF-5 Unifarco (Unione Farmacisti) - Unifarco - preparazione manuale operatore (Da Gestire)
+
+##############################
+# LOW PRIORITY
+##############################
+
+CEI-3 CEIA - modifica WMS  (Da Gestire)
+PEL-9 P.E. Labellers - PE Labellers - ritardo nella stampa delle etichette (Stand by Interno)
+BOS-44 Bossong - anomalia modifica dati casse (In Corso)
