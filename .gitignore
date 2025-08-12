@@ -16,3 +16,7 @@ __pycache__/
 
 # Ignora cartella backup
 backup/
+
+# Ignora cartella di compilazione
+build/
+dist/
