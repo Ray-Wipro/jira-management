@@ -20,6 +20,9 @@ Utilizzo:
 - Eseguire lo script da riga di comando.
 - Trovare i file `elenco_attivita.docx` e `elenco_attivita.txt` nella cartella di esecuzione.
 
+Nome del file: 
+- jira-tasks-report-v5.0.py
+
 Autore: Roberto Raimondi
 """
 
@@ -33,38 +36,111 @@ from docx import Document
 from docx.shared import Pt, Cm
 from docx.oxml.ns import qn
 from docx.enum.text import WD_LINE_SPACING
+from tkinter import Tk, Label, Button, StringVar
+from tkinter.ttk import Combobox
 
 doc = Document()
 load_dotenv()   
 
 # Carica le variabili d'ambiente da .env se presente
-VERSIONE    = "4.2"
-JIRA_URL = os.getenv("JIRA_URL")               # Esempio: https://ejlog.atlassian.net
-USERNAME = os.getenv("JIRA_USERNAME")          # Esempio: rraimondi@ferrettogroup.com
+VERSIONE    = "5.0"
+JIRA_URL = os.getenv("JIRA_URL")
+USERNAME = os.getenv("JIRA_USERNAME")
 API_TOKEN = os.getenv("JIRA_API_TOKEN")
 
 # JQL di ricerca
 JQL = 'assignee = currentUser() AND status in ("Da Gestire", "In corso", "Stand by Cliente", "Stand by Interno") ORDER BY priority DESC, project, duedate ASC, created ASC'
 
 # === PARAMETRI RICHIESTA ===
-url = f"{JIRA_URL}/rest/api/3/search"
-headers = {"Accept": "application/json"}
-auth = (USERNAME, API_TOKEN)
+URL = f"{JIRA_URL}/rest/api/3/search"
+HEADERS = {"Accept": "application/json"}
+AUTH = (USERNAME, API_TOKEN)
+
+SEARCH_PARAMS = {
+    "jql": JQL,
+    "fields": "key",
+    "maxResults": 1000
+}
+
+# === Recupero delle issue aperte ===
+def get_project_for_user():
+    jql_projects = JQL
+    params = {
+        "jql": jql_projects,
+        "fields": "project",
+        "maxResults": 1000
+    }
+    resp = requests.get(URL, headers=HEADERS, auth=AUTH, params=params)
+    if resp.status_code != 200:
+        print(f"Errore nella richiesta recupero progetti: {resp.status_code} {resp.text}")
+        return [] 
+    
+    data = resp.json()
+    issues = data.get("issues", [])
+    # Estrai i progetti unici
+    projects = set()
+    for issue in issues:
+        project_key = issue["fields"]["project"]["key"]
+        projects.add(project_key)
+    return sorted(projects)   
+
+# === Selezione del progetto ===
+def select_project_gui(projects_list):
+    projects_list = ["Tutti i progetti"] + sorted(projects_list)
+
+    root = Tk()
+    root.title("Selezione Progetto Jira")
+    root.geometry("400x200")
+
+    Label(root, text="Seleziona il progetto:").pack(padx=10, pady=5)
+    selected_project = StringVar()
+
+    combo = Combobox(root, values=projects_list, textvariable=selected_project, state="readonly")
+    combo.current(0)
+    combo.pack(padx=10, pady=5)
+
+    def on_confirm():
+        if selected_project.get():
+            root.destroy()
+
+    Button(root, text="Conferma", command=on_confirm).pack(pady=10)
+    root.mainloop()
+
+    return selected_project.get()
+
+# === Recupero lista progetti e selezione ===
+projects = get_project_for_user()
+if not projects:
+    print("Nessun progetto trovato per l'utente corrente.")
+    sys.exit(1)
+
+selected_project = select_project_gui(projects)
+if not selected_project:
+    print("Nessun progetto selezionato.")
+    sys.exit(1)
+
+base_JQL = JQL
+if selected_project != "Tutti i progetti":
+    JQL = f'assignee = currentUser() AND project = "{selected_project}" AND status in ("Da Gestire", "In corso", "Stand by Cliente", "Stand by Interno") ORDER BY priority DESC, project, duedate ASC, created ASC'
+else:
+    JQL = base_JQL
+    
+print(f"Progetto selezionato: {selected_project}")
 
 all_issues = []
 start_at = 0
-max_results = 50  # limite massimo Jira Cloud
+max_results = 100  # limite massimo Jira Cloud
 
 while True:
-    params = {
+    PARAMS = {
         "jql": JQL,
         "fields": "summary,status,priority,created,duedate,project,key",
         "startAt": start_at,
         "maxResults": max_results
     }
 
-    response = requests.get(url,
-                            headers=headers, auth=auth, params=params)
+    response = requests.get(URL,
+        headers=HEADERS, auth=AUTH, params=PARAMS)
 
     if response.status_code != 200:
         print(f"❌ Errore nella richiesta: {response.status_code} {response.text}")
@@ -87,6 +163,8 @@ while True:
     start_at += max_results
 
 print(f"\n🎯 Recuperati in totale {len(all_issues)} ticket da Jira")
+progetti = sorted(set(issue["fields"]["project"]["key"] for issue in all_issues))
+progetti.insert(0, "Tutti i progetti")
 
 # Salvataggio CSV
 csv_filename = "elenco_attivita.csv"

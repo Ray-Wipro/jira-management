@@ -12,6 +12,7 @@ __pycache__/
 *.doc
 *.docx
 *.txt
+*.csv
 
 # Ignora cartella backup
 backup/
