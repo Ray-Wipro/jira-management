@@ -3,6 +3,7 @@
 
 # Ignora eventuali file temporanei di Word
 ~$*.docx
+*.docx
 
 # Ignora cache Python
 __pycache__/
@@ -14,9 +15,8 @@ __pycache__/
 *.txt
 *.csv
 
-# Ignora cartella backup
+# Ignora cartella backup, file e cartelle di compilazione
 backup/
-
-# Ignora cartella di compilazione
 build/
 dist/
+*.spec
