@@ -12,7 +12,6 @@ __pycache__/
 # Ignora file di Word e di testo
 *.doc
 *.docx
-*.txt
 *.csv
 
 # Ignora cartella backup, file e cartelle di compilazione
