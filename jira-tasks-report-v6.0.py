@@ -54,7 +54,7 @@ API_TOKEN = os.getenv("JIRA_API_TOKEN")
 JQL = 'assignee = currentUser() AND status in ("Da Gestire", "In corso", "Stand by Cliente", "Stand by Interno") ORDER BY priority DESC, project, duedate ASC, created ASC'
 
 # === PARAMETRI RICHIESTA ===
-URL = f"{JIRA_URL}/rest/api/3/search"
+URL = f"{JIRA_URL}/rest/api/3/search/jql"
 HEADERS = {"Accept": "application/json"}
 AUTH = (USERNAME, API_TOKEN)
 
@@ -72,10 +72,21 @@ def get_project_for_user():
         "fields": "project",
         "maxResults": 1000
     }
-    resp = requests.get(URL, headers=HEADERS, auth=AUTH, params=params)
+
+    try:
+        resp = requests.get(URL, headers=HEADERS, auth=AUTH, params=params)
+    except requests.RequestException as e:
+        print(f"Errore di connessione a Jira: {e}")
+        return []    
+    
+    if resp.status_code == 410:
+        print(f"Errore 410: l'endpiont API non è più valido."
+              "Aggiornare l'URL secondo le nuove specifiche di Jira Cloud.")
+        return []
+    
     if resp.status_code != 200:
         print(f"Errore nella richiesta recupero progetti: {resp.status_code} {resp.text}")
-        return [] 
+        return []
     
     data = resp.json()
     issues = data.get("issues", [])
@@ -113,8 +124,8 @@ def select_project_gui(projects_list):
 # === Recupero lista progetti e selezione ===
 projects = get_project_for_user()
 if not projects:
-    print("Nessun progetto trovato per l'utente corrente.")
-    sys.exit(1)
+     print("Nessun progetto trovato per l'utente corrente.")
+     sys.exit(1)
 
 selected_project = select_project_gui(projects)
 if not selected_project:
@@ -145,7 +156,7 @@ while True:
         headers=HEADERS, auth=AUTH, params=PARAMS)
 
     if response.status_code != 200:
-        print(f"❌ Errore nella richiesta: {response.status_code} {response.text}")
+        print(f"Errore nella richiesta: {response.status_code} {response.text}")
         break
 
     data = response.json()
@@ -156,7 +167,7 @@ while True:
 
     all_issues.extend(issues)
 
-    print(f"✅ Recuperati {len(issues)} ticket (totale finora: {len(all_issues)})")
+    print(f"Recuperati {len(issues)} ticket (totale finora: {len(all_issues)})")
 
     # Controlla se abbiamo preso tutto
     if start_at + max_results >= data.get("total", 0):
@@ -164,7 +175,7 @@ while True:
 
     start_at += max_results
 
-print(f"\n🎯 Recuperati in totale {len(all_issues)} ticket da Jira")
+print(f"\nRecuperati in totale {len(all_issues)} ticket da Jira")
 progetti = sorted(set(issue["fields"]["project"]["key"] for issue in all_issues))
 progetti.insert(0, "Tutti i progetti")
 

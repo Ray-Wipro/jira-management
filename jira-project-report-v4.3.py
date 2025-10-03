@@ -20,7 +20,7 @@ Requisiti:
 - Permessi di accesso in lettura al progetto Jira
 
 Nome del file:
-- jira-project-report-v4.2.py
+- jira-project-report-v4.3.py
 
 Autore: Roberto Raimondi
 Ultima modifica: 21/08/2025
@@ -36,8 +36,9 @@ from docx import Document
 from docx.text.paragraph import Paragraph
 from docx.table import _Cell
 from docx.enum.text import WD_LINE_SPACING, WD_PARAGRAPH_ALIGNMENT
-from docx.oxml.ns import qn
-from docx.shared import Cm, Pt
+from docx.oxml import OxmlElement, parse_xml
+from docx.oxml.ns import qn, nsdecls
+from docx.shared import Cm, Pt, RGBColor
 from tkinter import Button, Entry, Label, StringVar, Tk, messagebox
 from tkinter.ttk import Combobox
 
@@ -45,7 +46,7 @@ from tkinter.ttk import Combobox
 load_dotenv()
 
 # === CONFIGURAZIONE JIRA ===
-VERSION     = "4.2"
+VERSION     = "4.3"
 
 JIRA_URL    = os.getenv("JIRA_URL")
 USERNAME    = os.getenv("JIRA_USERNAME")
@@ -114,83 +115,13 @@ def get_ticket_comments(ticket_key):
     all_comments.sort(key=lambda x: x["created"])
     return all_comments
 
-# === Funzione per aggiungere un bullet point con indentazione ===
-def add_bullet(doc, text, level=0):
-    if not text.strip():
-        return
-
-    # Seleziona lo stile in base al livello
-    style_name = "List Bullet" if level == 0 else f"List Bullet {level+1}"
-    
-    # Crea un paragrafo con lo stile di elenco puntato
-    p = doc.add_paragraph(style=style_name)
-    
-    # Inserisce il testo mantenendo i ritorni a capo interni
-    for i, line in enumerate(text.splitlines()):
-        if i > 0:
-            p.add_run("\n")  # ritorno a capo interno
-        p.add_run(line)
-
-# === Funzione di parsing di un nodo ADF in un documento Word con elenchi annidati ===
-def parse_node(node, doc, level=0):
-    ntype = node.get("type")
-    if ntype is None:
-        return
-
-    match ntype:
-        case "heading":
-            lvl = node.get("attrs", {}).get("level", 1)
-            text = get_text_from_content(node.get("content", []))
-            if text.strip():
-                doc.add_heading(text, level=lvl)
-
-        case "paragraph":
-            text = get_text_from_content(node.get("content", []))
-            if text.strip():
-                doc.add_paragraph(text)
-
-        case "bulletList" | "orderedList":
-            for li in node.get("content", []):
-                parse_node(li, doc, level)
-
-        case "listItem":
-            # Testo del listItem (escludendo eventuali sotto-liste)
-            text_parts = [
-                get_text_from_content([child])
-                for child in node.get("content", [])
-                if not (isinstance(child, dict) and child.get("type") in ("bulletList", "orderedList"))
-            ]
-            raw_text = "\n".join([t for t in text_parts if t is not None])
-
-            if raw_text.strip():
-                add_bullet(doc, raw_text, level)
-
-            # Sotto-liste (ricorsione con livello+1)
-            for child in node.get("content", []):
-                if isinstance(child, dict) and child.get("type") in ("bulletList", "orderedList"):
-                    parse_node(child, doc, level + 1)
-                    
-        case "table":
-            rows = node.get("content", [])
-            if rows:
-                cols_count = len(rows[0].get("content", []))
-                table = doc.add_table(rows=len(rows), cols=cols_count)
-                for r_idx, row in enumerate(rows):
-                    for c_idx, cell in enumerate(row.get("content", [])):
-                        cell_text = get_text_from_content(cell.get("content", []))
-                        table.cell(r_idx, c_idx).text = cell_text
-
-        case _:  # altri tipi non gestiti esplicitamente
-            for child in node.get("content", []):
-                if isinstance(child, dict):
-                    parse_node(child, doc, level)
-
 # === Funzione per applicare gli stili a un run di testo ===
-def apply_marks_to_run(run, marks):
-    if not marks:
-        return
+def apply_marks_to_run(run, marks: list):
     for mark in marks:
-        match mark.get("type"):
+        mtype = mark.get("type")
+        attrs = mark.get("attrs", {})
+
+        match mtype:
             case "strong":
                 run.bold = True
             case "em":
@@ -200,52 +131,65 @@ def apply_marks_to_run(run, marks):
             case "strike":
                 run.font.strike = True
             case "subsup":
-                attrs = mark.get("attrs", {})
-                if attrs.get("subscript"):
-                    run.font.subscript = True
-                elif attrs.get("superscript"):
-                    run.font.superscript = True
+                match attrs.get("subscript"), attrs.get("superscript"):
+                    case True, _:
+                        run.font.subscript = True
+                    case _, True:
+                        run.font.superscript = True
+            case "color" | "textColor":
+                color = attrs.get("color", "000000")
+                run.font.color.rgb = RGBColor.from_string(normalize_color(color))
+            case "link":
+                # Hyperlink non nativo in docx, lasciamo solo il testo visibile
+                pass
             case "code":
                 run.font.name = "Courier New"
-                run.font.size = Pt(10)
-                run.element.rPr.rFonts.set(qn('w:eastAsia'), 'Courier New')
-            case "link":
-                # Hyperlink nel run non è nativo in python-docx, serve soluzione custom
-                pass
-            case "color" | "textColor":
-                color = mark.get("attrs", {}).get("color")
-                if color:
-                    from docx.shared import RGBColor
-                    run.font.color.rgb = RGBColor.from_string(color)
+                run.font.size = Pt(9)
+
+# === Funzione per normalizzare i colori esadecimali ===
+def normalize_color(color: str) -> str:
+    if not color:
+        return "000000"  # default nero
+    color = color.strip()
+    if color.startswith("#"):
+        color = color[1:]
+    match len(color):
+        case 1:
+            color = color * 6
+        case 3:
+            color = "".join([c*2 for c in color])
+        case 4:
+            # rgba esadecimale tipo #f00f -> ignoriamo alpha
+            color = "".join([c*2 for c in color[:3]])
+        case _ if len(color) > 6:
+            color = color[:6]
+    return color.upper()
 
 # === Funzione per aggiungere testo con stili a un paragrafo o cella ===
 def add_text(parent, text, marks=None):
     if not text:
-        return
+        return None
+    if marks is None:
+        marks = []
 
-    match parent.__class__.__name__:
-        case "_Cell":
-            p = parent.add_paragraph()
-            run = p.add_run(text)
-        case "Paragraph":
-            run = parent.add_run(text)
+    # Determina dove aggiungere il run
+    match parent:
+        case _Cell():
+                p = parent.add_paragraph()
+                run = p.add_run(text)
+        case Paragraph():
+                run = parent.add_run(text)
         case "Document":
             p = parent.add_paragraph()
             run = p.add_run(text)
         case _:
-            # fallback generico
-            p = parent.add_paragraph()
-            run = p.add_run(text)
+                p = parent.add_paragraph()
+                run = p.add_run(text)
 
     apply_marks_to_run(run, marks)
     return run
 
 # === Funzione per generare il documento Word ===
-"""
-def parse_adf_to_docx(content, doc):
-    for block in content:
-        parse_node(block, doc)
-"""
 def parse_adf_to_docx(content, parent, level=1):
     """
     Converte il contenuto ADF (Atlassian Document Format) in paragrafi e run di Word.
@@ -255,12 +199,17 @@ def parse_adf_to_docx(content, parent, level=1):
         node_type = node.get("type")
 
         match node_type:
-
             case "paragraph":
                 p = parent.add_paragraph()
-                if "content" in node:
-                    for child in node.get("content", []):
-                        parse_adf_to_docx([child], p, level)
+                for child in node.get("content", []):
+                    child_type = child.get("type")
+                    match child_type:
+                        case "text":
+                            add_text(p, child.get("text", ""), marks=child.get("marks", []))
+                        case "hardBreak":
+                            p.add_run().add_break()
+                        case _ if "content" in child:
+                            parse_adf_to_docx(child["content"], p, level)
 
             case "heading":
                 level = node.get("attrs", {}).get("level", 1)
@@ -268,117 +217,144 @@ def parse_adf_to_docx(content, parent, level=1):
                     heading_text = "".join(
                         [c.get("text", "") for c in node["content"] if c["type"] == "text"]
                     )
-                    parent.add_heading(heading_text, level=level)
+                    match type(parent).__name__:
+                        case "Document" | "Paragraph":
+                            parent.add_heading(heading_text, level=level)
+                        case "Cell":
+                            # dentro una cella, aggiungi paragrafo con stile heading
+                            p = parent.add_paragraph(heading_text, style=f"Heading {level}")
 
-            case "bulletList":
-
-                parse_list(node, parent, level=1, ordered=False)
-
-            case "orderedList":
-
-                parse_list(node, parent, level=1, ordered=True)
-
+            # case "bulletList" | "orderedList":
+            #     style = "List Bullet" if node_type == "bulletList" else "List Number"
+            #     for li in node.get("content", []):  # ogni listItem
+            #         if li.get("type") == "listItem":
+            #             for paragraph_node in li.get("content", []):
+            #                 if paragraph_node["type"] == "paragraph":
+            #                     p = parent.add_paragraph(style=style)
+            #                     for child in paragraph_node.get("content", []):
+            #                         child_type = child.get("type")
+            #                         match child_type:
+            #                             case "text":
+            #                                 add_text(p, child.get("text", ""), marks=child.get("marks", []))
+            #                             case "hardBreak":
+            #                                 p.add_run().add_break()
+            #                             case _ if "content" in child:
+            #                                 parse_adf_to_docx(child["content"], p, level)
+            #                 elif paragraph_node["type"] in ("bulletList", "orderedList"):
+            #                     # Gestione corretta delle liste annidate
+            #                     parse_adf_to_docx([paragraph_node], parent, level + 1)
+                                
+            case "bulletList" | "orderedList":
+                ordered = node_type == "orderedList"
+                for li in node.get("content", []):  # ogni listItem
+                    if li.get("type") == "listItem":
+                        # 1) Estrae tutto il testo dai paragraph interni
+                        text_parts = []
+                        for child in li.get("content", []):
+                            if child.get("type") == "paragraph":
+                                text_parts.append(get_text_from_content(child.get("content", [])))
+                        raw_text = "\n".join([t for t in text_parts if t.strip()])
+                        if raw_text:
+                            add_bullet(parent, raw_text, level)
+                        # 2) processa eventuali sotto-liste annidate
+                        for child in li.get("content", []):
+                            if child.get("type") in ("bulletList", "orderedList"):
+                                parse_adf_to_docx([child], parent, level + 1)
+                    
             case "codeBlock":
                 code_text = ""
                 for child in node.get("content", []):
                     if child["type"] == "text":
                         code_text += child.get("text", "") + "\n"
                 if code_text.strip():
-                    # p = parent.add_paragraph()
-                    # run = p.add_run(code_text.rstrip())
-                    run = add_text(parent, code_text.rstrip(), marks=node.get("marks", []))
+                    p = parent.add_paragraph()
+                    run = add_text(p, code_text.rstrip(), marks=node.get("marks", []))
                     run.font.name = "Courier New"
                     run.font.size = Pt(9)
 
             case "panel":
-                panel_type = node.get("attrs", {}).get("panelType", "info")
                 table = parent.add_table(rows=1, cols=1)
                 cell = table.rows[0].cells[0]
-                for child in node.get("content", []):
-                    parse_adf_to_docx(child.get("content", []), cell, level)
+                add_info_panel(cell)
+                if "content" in node:
+                    parse_adf_to_docx(node["content"], cell, level)
 
             case "text":
-                # text = node.get("text", "")
-                # run = parent.add_run(node.get("text", ""))
-                run = add_text(parent, node.get("text", ""), marks=node.get("marks", []))
-                if not run:
-                    continue
-                # gestione stili
-                for mark in node.get("marks", []):
-                    match mark.get("type"):
-                        case "strong":
-                            run.bold = True
-                        case "em":
-                            run.italic = True
-                        case "underline":
-                            run.underline = True
-                        case "strike":
-                            run.font.strike = True
-                        case "subsup":
-                            if "subscript" in mark.get("attrs", {}):
-                                run.font.subscript = True
-                            elif "superscript" in mark.get("attrs", {}):
-                                run.font.superscript = True
-                        case "link":
-                            href = mark.get("attrs", {}).get("href", "")
-                            if href:
-                                run.hyperlink = href
-                        case "color":
-                            color = mark.get("attrs", {}).get("color", "000000")
-                            if color:
-                                run.font.color.rgb = color
-                        case "textColor":
-                            color = mark.get("attrs", {}).get("color", "000000")
-                            if color:
-                                run.font.color.rgb = color
+                text = node.get("text", "")
+                marks = node.get("marks", [])
+                add_text(parent, text, marks)
 
-                # Gestione eventuali tipi non ancora implementati
+            case "hardBreak":
+                if isinstance(parent, Paragraph):
+                    parent.add_run().add_break()
+                elif isinstance(parent, _Cell):
+                    parent.add_paragraph("")
+                else:
+                    parent.add_paragraph("")
+
+            case _ if "content" in node:
+                parse_adf_to_docx(node["content"], parent, level)
+
+            case _:
                 pass
         # Se ci sono altri tipi di nodo, si possono aggiungere qui...
 
+# === Funzione per aggiungere un pannello informativo con bordo e sfondo ===
+def add_info_panel(cell, bg_color="D9D9D9", border_size=4, border_color="000000"):
+    """
+    Trasforma una cella (panel) in un pannello visivamente evidenziato:
+    - Colore di sfondo (bg_color, esadecimale senza '#')
+    - Bordo attorno alla cella (border_size in punti, border_color esadecimale)
+    """
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+
+    # Shading (sfondo)
+    shading = parse_xml(r'<w:shd {} w:fill="{}"/>'.format(nsdecls('w'), bg_color))
+    tcPr.append(shading)
+
+    # Bordo (perimetrale)
+    from docx.oxml import OxmlElement
+    borders = OxmlElement('w:tcBorders')
+    for edge in ("top", "left", "bottom", "right"):
+        border = OxmlElement(f'w:{edge}')
+        border.set(qn('w:val'), 'single')
+        border.set(qn('w:sz'), str(border_size))
+        border.set(qn('w:color'), border_color)
+        borders.append(border)
+    tcPr.append(borders)
+
+    # Aggiunta di padding interno (optional)
+    tcPr.set(qn('w:textDirection'), "btLr")
+
 # === Funzione per gestire elenchi puntati e numerati con indentazione manuale ===
-def parse_list(node, doc, level=1, ordered=False):
-    """
-    Gestisce bulletList e orderedList ricorsivamente con indentazione manuale.
-    """
+def parse_list(node, parent, level=1, ordered=False):
+    style = "List Number" if ordered else "List Bullet"
     for li in node.get("content", []):
+        # crea il paragrafo principale del bullet
+        p = parent.add_paragraph(style=style)
+        p.paragraph_format.left_indent = Cm(0.75 * (level - 1))
+        p.paragraph_format.first_line_indent = Cm(0)
+
         for child in li.get("content", []):
-            match child["type"]:
+            match child.get("type"):
                 case "paragraph":
-                    text = "".join(
-                        [c.get("text", "") for c in child.get("content", []) if c["type"] == "text"]
-                    )
-                    style = "List Number" if ordered else "List Bullet"
-                    p = doc.add_paragraph(text, style=style)
-                    # indentazione progressiva per livelli annidati
-                    p.paragraph_format.left_indent = Cm(0)
-                    p.paragraph_format.first_line_indent = Cm(0) 
-                    if level > 1:
-                        indent = Cm(0.75 * (level - 1))
-                        p.paragraph_format.left_indent = indent
-                        p.paragraph_format.first_line_indent = Cm(0)
-
+                    for sub in child.get("content", []):
+                        match sub.get("type"):
+                            case "text":
+                                add_text(p, sub.get("text", ""), marks=sub.get("marks", []))
+                            case "hardBreak":
+                                p.add_run().add_break()
+                            case _ if "content" in sub:
+                                # testo annidato dentro paragraph
+                                parse_adf_to_docx(sub["content"], p, level + 1)
                 case "bulletList":
-                    parse_list(child, doc, level + 1, ordered=False)
-
+                    # sotto-elenco: livello +1
+                    parse_list(child, parent, level + 1, ordered=False)
                 case "orderedList":
-                    parse_list(child, doc, level + 1, ordered=True)
+                    parse_list(child, parent, level + 1, ordered=True)
 
 # === Funzione per estrarre il testo da un contenuto ADF (rich text) ===
-"""
-def get_text_from_content(content_list):
-    texts = []
-    for c in content_list:
-        match c.get("type"):
-            case "text":
-                texts.append(c.get("text", ""))
-            case _ if "content" in c:
-                texts.append(get_text_from_content(c["content"]))
-            case _:
-                pass
-    return "".join(texts)
-"""
-
 def get_text_from_content(content_list):
     texts = []
     for c in content_list:
@@ -450,6 +426,32 @@ def add_multiline_text(parent, text: str):
         p = parent.add_paragraph(line.strip() if line.strip() else "")
     return
 
+# === Funzione per aggiungere un bullet con indentazione coerente ===
+def add_bullet(doc, text, level=1):
+    if not text:
+        return
+    lines = text.splitlines()
+    first_line = lines[0] if lines else ""
+    para = doc.add_paragraph()
+    pf = para.paragraph_format
+    pf.left_indent = Cm(0.75 * (level - 1))
+    pf.first_line_indent = Cm(0)
+    pf.space_after = Pt(2)
+    para.add_run("• " + first_line)
+
+    # righe successive del bullet
+    for extra_line in lines[1:]:
+        p2 = doc.add_paragraph()
+        pf2 = p2.paragraph_format
+        pf2.left_indent = Cm(0.75 * level)
+        pf2.first_line_indent = Cm(0)
+        pf2.space_after = Pt(2)
+        p2.add_run(extra_line)
+
+    return para
+
+# === Sostituire il case "bulletList" | "orderedList" in parse_adf_to_docx ===
+
 # === Creazione documento Word ===
 def create_word_document(ticket_key, summary, description_adf, riferimenti, ambiente, comments, cliente):
     doc = Document()
@@ -493,12 +495,10 @@ def create_word_document(ticket_key, summary, description_adf, riferimenti, ambi
         add_multiline_text(doc, riferimenti.strip())
     else:
         doc.add_paragraph("-")
-#    doc.add_paragraph(riferimenti or "-")
 
     # Ambiente
     doc.add_heading("Informazioni sull'Ambiente", level=1)
     add_multiline_text(doc, ambiente)
-#    doc.add_paragraph(ambiente or "-")
 
     # Descrizione dettagliata
     doc.add_heading("Descrizione dettagliata", level=1)
@@ -523,10 +523,6 @@ def create_word_document(ticket_key, summary, description_adf, riferimenti, ambi
             if isinstance(body, dict) and "content" in body:
                 parse_adf_to_docx(body["content"], doc)
             elif isinstance(body, str):
-#                text = body.strip()
-#                if text:
-#                    doc.add_paragraph(text)
-                # Se il body è una stringa, aggiungilo come paragrafo
                 add_multiline_text(doc, body.strip())
             else:
                 doc.add_paragraph("—")
@@ -540,14 +536,13 @@ def create_word_document(ticket_key, summary, description_adf, riferimenti, ambi
     doc.save(filename)
     print(f"Documento salvato: {filename}")
 
-
 # === GUI selezione ticket ===
 def select_ticket_gui(tickets_list):
     root = Tk()
     root.title("Selezione Ticket Jira")
     root.geometry("500x200")
 
-    Label(root, text="Seleziona un ticket:").pack(padx=10, pady=5)
+    Label(root, text="Seleziona un ticket aperto:").pack(padx=10, pady=5)
     selected_ticket = StringVar()
     combo = Combobox(root, values=tickets_list, textvariable=selected_ticket, state="readonly", width=60)
     combo.pack(padx=10, pady=5)
@@ -555,6 +550,7 @@ def select_ticket_gui(tickets_list):
     Label(root, text="Oppure inserisci codice ticket (es. XXX-123):").pack(padx=10, pady=5)
     manual_ticket = Entry(root, width=30)
     manual_ticket.pack(padx=10, pady=5)
+    manual_ticket.focus_set()
 
     def on_confirm():
         choice = manual_ticket.get().strip()
@@ -568,6 +564,9 @@ def select_ticket_gui(tickets_list):
         root.destroy()
 
     Button(root, text="Conferma", command=on_confirm).pack(pady=10)
+    manual_ticket.bind("<Return>", lambda event: on_confirm())
+    combo.bind("<Return>", lambda event: on_confirm())
+
     root.mainloop()
     return getattr(root, "selected", None)
 
